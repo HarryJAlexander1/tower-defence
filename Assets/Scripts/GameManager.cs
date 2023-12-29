@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -7,6 +8,8 @@ public class GameManager : MonoBehaviour
     private Transform Platform;
     private const int LevelDimension = 16;
     private Vector3 LevelSpawnPosition = new(0, 0, 0);
+    
+    public List<Square> Squares = new List<Square>();
 
     // Start is called before the first frame update
     void Start()
@@ -30,15 +33,36 @@ public class GameManager : MonoBehaviour
         Platform.localScale = new Vector3(LevelDimension, transform.localScale.y, LevelDimension);
 
         // generate grid of squares using platform transform
-        GenerateGrid(Platform);
-        
+        GenerateGrid(Platform);   
     }
     private void GenerateGrid(Transform platform) 
     {
+        List<Vector3> positionsList = new List<Vector3>();
+        Vector3 position = new(-(platform.localScale.x * 0.5f), 1, -(platform.localScale.z * 0.5f));
 
+        for (int i = 0; i < LevelDimension; i++) 
+        {
+            for (int j = 0; j < LevelDimension; j++) 
+            {
+                positionsList.Add(position);
+                GenerateSquareFromPosition(position);
+                position.x++;
+            }
+            position.z++;
+            position.x = -position.x; // reset position on x axis
+        }
     }
 
-    private class Square // utility class representing a walkable square in the level
+    private void GenerateSquareFromPosition(Vector3 position) 
+    {
+        Vector3 VertexB = new(position.x + 1, position.y, position.z);
+        Vector3 VertexC = new(position.x, position.y, position.z + 1);
+        Vector3 VertexD = new(position.x + 1, position.y, position.z + 1);
+        Square square = new Square(Squares.Count, position, VertexB, VertexC, VertexD);
+        Squares.Add(square);
+    }
+
+    public class Square // utility class representing a walkable square in the level
     {
         public int Id { get; set; }
         public Vector3 VertexA { get; set; }
@@ -58,7 +82,6 @@ public class GameManager : MonoBehaviour
             CenterPoint = ComputeCenterPoint();
             IsWalkable = true;
         }
-
         private Vector3 ComputeCenterPoint()
         {
             float centerX = (VertexA.x + VertexB.x + VertexC.x + VertexD.x) / 4;
