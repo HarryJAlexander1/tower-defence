@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -6,10 +7,15 @@ public class GameManager : MonoBehaviour
     public GameObject LevelPrefab;
     private GameObject Level;
     private Transform Platform;
-    private const int LevelDimension = 16;
+    private const int LevelDimension = 32;
     private Vector3 LevelSpawnPosition = new(0, 0, 0);
-    
+
+    private List<Vector3> BoundrySquareCenterPoints = new List<Vector3>();
+    private static int AgentSpawnNumber = 1;
+    public List<Vector3> AgentSpawnPositions = new List<Vector3>();
+
     public List<Square> Squares = new List<Square>();
+    private List<Vector3> PositionsList = new List<Vector3>();
 
     // Start is called before the first frame update
     void Start()
@@ -20,10 +26,10 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
-    private void CreateLevel() 
+    private void CreateLevel()
     {
         // instantiate level gameobject
         Level = Instantiate(LevelPrefab, LevelSpawnPosition, Quaternion.identity);
@@ -33,33 +39,53 @@ public class GameManager : MonoBehaviour
         Platform.localScale = new Vector3(LevelDimension, transform.localScale.y, LevelDimension);
 
         // generate grid of squares using platform transform
-        GenerateGrid(Platform);   
-    }
-    private void GenerateGrid(Transform platform) 
-    {
-        List<Vector3> positionsList = new List<Vector3>();
-        Vector3 position = new(-(platform.localScale.x * 0.5f), 1, -(platform.localScale.z * 0.5f));
+        GenerateGrid(Platform);
 
-        for (int i = 0; i < LevelDimension; i++) 
+        // select agent spawn positions
+        for (int i = 0; i < AgentSpawnNumber; i++)
         {
-            for (int j = 0; j < LevelDimension; j++) 
+            int randomNumber = Random.Range(0, BoundrySquareCenterPoints.Count);
+            Debug.Log($"Random number: {randomNumber} i: {i}");
+            AgentSpawnPositions.Add(BoundrySquareCenterPoints[randomNumber]);
+        }
+        /*  foreach (Vector3 test in AgentSpawnPositions)
+          {
+              var poop = Instantiate(LevelPrefab, test, Quaternion.identity);
+              poop.transform.localScale = Vector3.one;
+          }*/
+    }
+    private void GenerateGrid(Transform platform)
+    {
+        Vector3 position = new(-(platform.localScale.x * 0.5f), 1, -(platform.localScale.z * 0.5f));
+        float minimum = -(Platform.localScale.x * 0.5f);
+        float maximum = (Platform.localScale.x * 0.5f) - 1;
+
+        for (int i = 0; i < LevelDimension; i++)
+        {
+            for (int j = 0; j < LevelDimension; j++)
             {
-                positionsList.Add(position);
-                GenerateSquareFromPosition(position);
+                PositionsList.Add(position);
+                Square square = GenerateSquareFromPosition(position);
+                Squares.Add(square);
+
+                if (position.x == minimum || position.x == maximum
+                    || position.z == minimum || position.z == maximum) // get all positions on the outside of the level 
+                {
+                    BoundrySquareCenterPoints.Add(square.CenterPoint);
+                }
+
                 position.x++;
             }
             position.z++;
             position.x = -position.x; // reset position on x axis
         }
     }
-
-    private void GenerateSquareFromPosition(Vector3 position) 
+    private Square GenerateSquareFromPosition(Vector3 position)
     {
         Vector3 VertexB = new(position.x + 1, position.y, position.z);
         Vector3 VertexC = new(position.x, position.y, position.z + 1);
         Vector3 VertexD = new(position.x + 1, position.y, position.z + 1);
-        Square square = new Square(Squares.Count, position, VertexB, VertexC, VertexD);
-        Squares.Add(square);
+        return new Square(Squares.Count, position, VertexB, VertexC, VertexD);
     }
 
     public class Square // utility class representing a walkable square in the level
@@ -84,12 +110,11 @@ public class GameManager : MonoBehaviour
         }
         private Vector3 ComputeCenterPoint()
         {
-            float centerX = (VertexA.x + VertexB.x + VertexC.x + VertexD.x) / 4;
-            float centerY = (VertexA.y + VertexB.y + VertexC.y + VertexD.y) / 4; // y axis for each vertex should always be 1
-            float centerZ = (VertexA.z + VertexB.z + VertexC.z + VertexD.z) / 4;
+            float centerX = (VertexA.x + VertexB.x + VertexC.x + VertexD.x) * 0.25f;
+            float centerY = (VertexA.y + VertexB.y + VertexC.y + VertexD.y) * 0.25f; // y axis for each vertex should always be 1
+            float centerZ = (VertexA.z + VertexB.z + VertexC.z + VertexD.z) * 0.25f;
 
             return new Vector3(centerX, centerY, centerZ);
         }
     }
-
 }
