@@ -1,19 +1,21 @@
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class GameManager : MonoBehaviour
 {
     public GameObject LevelPrefab;
     private GameObject Level;
     private Transform Platform;
-    private const int LevelDimension = 32;
+    private Transform Tower;
+    private const int LevelDimension = 75;
     private Vector3 LevelSpawnPosition = new(0, 0, 0);
 
     private List<Vector3> BoundrySquareCenterPoints = new List<Vector3>();
     private static int AgentSpawnNumber = 1;
     public List<Vector3> AgentSpawnPositions = new List<Vector3>();
-
+    public GameObject AgentPrefab;
     public List<Square> Squares = new List<Square>();
     private List<Vector3> PositionsList = new List<Vector3>();
 
@@ -21,6 +23,11 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         CreateLevel();
+        // spawn agents in positions
+        foreach (Vector3 position in AgentSpawnPositions)
+        {
+            SpawnAgent(position);
+        }
     }
 
     // Update is called once per frame
@@ -34,9 +41,14 @@ public class GameManager : MonoBehaviour
         // instantiate level gameobject
         Level = Instantiate(LevelPrefab, LevelSpawnPosition, Quaternion.identity);
 
-        // set dimensions of platform child game object
+        // set dimensions of platform
         Platform = Level.transform.Find("Platform");
         Platform.localScale = new Vector3(LevelDimension, transform.localScale.y, LevelDimension);
+
+        // set dimensions of tower
+        Tower = Level.transform.Find("Tower");
+        Tower.localScale = new Vector3(1, 5, 1);
+        Tower.transform.position += Vector3.up * ((Tower.transform.localScale.y * 0.5f) - 0.5f);
 
         // generate grid of squares using platform transform
         GenerateGrid(Platform);
@@ -48,12 +60,14 @@ public class GameManager : MonoBehaviour
             Debug.Log($"Random number: {randomNumber} i: {i}");
             AgentSpawnPositions.Add(BoundrySquareCenterPoints[randomNumber]);
         }
-        /*  foreach (Vector3 test in AgentSpawnPositions)
-          {
-              var poop = Instantiate(LevelPrefab, test, Quaternion.identity);
-              poop.transform.localScale = Vector3.one;
-          }*/
     }
+
+    private void SpawnAgent(Vector3 location) 
+    {
+        var agent = Instantiate(AgentPrefab, location, Quaternion.identity);
+        agent.transform.position = new(agent.transform.position.x, agent.transform.position.y + 0.5f, agent.transform.position.z); // adjust position of agent to account for its height.
+    }
+
     private void GenerateGrid(Transform platform)
     {
         Vector3 position = new(-(platform.localScale.x * 0.5f), 1, -(platform.localScale.z * 0.5f));
