@@ -19,6 +19,8 @@ public class GameManager : MonoBehaviour
     public List<Square> Squares = new List<Square>();
     private List<Vector3> PositionsList = new List<Vector3>();
 
+    public GameObject PlayerPrefab;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -26,8 +28,10 @@ public class GameManager : MonoBehaviour
         // spawn agents in positions
         foreach (Vector3 position in AgentSpawnPositions)
         {
-            SpawnAgent(position);
+            SpawnEntity(position, AgentPrefab); // spawn enemy agent
         }
+
+        SpawnEntity(new(5, 0, 0), PlayerPrefab); // spawn player
     }
 
     // Update is called once per frame
@@ -62,10 +66,10 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void SpawnAgent(Vector3 location) 
+    private void SpawnEntity(Vector3 location, GameObject prefab) 
     {
-        var agent = Instantiate(AgentPrefab, location, Quaternion.identity);
-        agent.transform.position = new(agent.transform.position.x, agent.transform.position.y + 0.5f, agent.transform.position.z); // adjust position of agent to account for its height.
+        var entity = Instantiate(prefab, location, Quaternion.identity);
+        entity.transform.position = new(entity.transform.position.x, entity.transform.position.y + 0.5f, entity.transform.position.z); // adjust position of agent to account for its height.
     }
 
     private void GenerateGrid(Transform platform)
