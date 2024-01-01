@@ -12,13 +12,12 @@ public class GameManager : MonoBehaviour
     private const int LevelDimension = 75;
     private Vector3 LevelSpawnPosition = new(0, 0, 0);
 
-    private List<Vector3> BoundrySquareCenterPoints = new List<Vector3>();
+    private List<Square> BoundrySquares = new List<Square>();
     private static int AgentSpawnNumber = 1;
-    public List<Vector3> AgentSpawnPositions = new List<Vector3>();
+    public List<Square> AgentStartingSquares = new List<Square>();
     public GameObject AgentPrefab;
     public List<Square> Squares = new List<Square>();
-    private List<Vector3> PositionsList = new List<Vector3>();
-
+ 
     public GameObject PlayerPrefab;
 
     // Start is called before the first frame update
@@ -26,9 +25,11 @@ public class GameManager : MonoBehaviour
     {
         CreateLevel();
         // spawn agents in positions
-        foreach (Vector3 position in AgentSpawnPositions)
+        foreach (Square Square in AgentStartingSquares)
         {
-            SpawnEntity(position, AgentPrefab); // spawn enemy agent
+            var agent = SpawnEntity(Square.CenterPoint, AgentPrefab); // spawn enemy agent
+            var agentPathFinding = agent.GetComponent<PathFinding>();
+            agentPathFinding.StartingSquare = Square;
         }
 
         SpawnEntity(new(5, 0, 0), PlayerPrefab); // spawn player
@@ -60,16 +61,17 @@ public class GameManager : MonoBehaviour
         // select agent spawn positions
         for (int i = 0; i < AgentSpawnNumber; i++)
         {
-            int randomNumber = Random.Range(0, BoundrySquareCenterPoints.Count);
+            int randomNumber = Random.Range(0, BoundrySquares.Count);
             Debug.Log($"Random number: {randomNumber} i: {i}");
-            AgentSpawnPositions.Add(BoundrySquareCenterPoints[randomNumber]);
+            AgentStartingSquares.Add(BoundrySquares[randomNumber]);
         }
     }
 
-    private void SpawnEntity(Vector3 location, GameObject prefab) 
+    private GameObject SpawnEntity(Vector3 location, GameObject prefab) 
     {
         var entity = Instantiate(prefab, location, Quaternion.identity);
         entity.transform.position = new(entity.transform.position.x, entity.transform.position.y + 0.5f, entity.transform.position.z); // adjust position of agent to account for its height.
+        return entity;
     }
 
     private void GenerateGrid(Transform platform)
@@ -82,14 +84,13 @@ public class GameManager : MonoBehaviour
         {
             for (int j = 0; j < LevelDimension; j++)
             {
-                PositionsList.Add(position);
                 Square square = GenerateSquareFromPosition(position);
                 Squares.Add(square);
 
                 if (position.x == minimum || position.x == maximum
                     || position.z == minimum || position.z == maximum) // get all positions on the outside of the level 
                 {
-                    BoundrySquareCenterPoints.Add(square.CenterPoint);
+                    BoundrySquares.Add(square);
                 }
 
                 position.x++;
