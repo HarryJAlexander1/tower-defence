@@ -9,12 +9,12 @@ public class GameManager : MonoBehaviour
     private GameObject Level;
     private Transform Platform;
     private Transform Tower;
-    private const int LevelDimension = 75;
+    private const int LevelDimension = 60;
     private Vector3 LevelSpawnPosition = new(0, 0, 0);
 
     private List<Square> BoundrySquares = new List<Square>();
     private static int AgentSpawnNumber = 1;
-    public List<Square> AgentStartingSquares = new List<Square>();
+    public List<Graph.Vertex> AgentStartingVertices = new List<Graph.Vertex>();
     public GameObject AgentPrefab;
     public List<Square> Squares = new List<Square>();
  
@@ -24,12 +24,33 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         CreateLevel();
-        // spawn agents in positions
-        foreach (Square Square in AgentStartingSquares)
+        Graph graph = ScriptableObject.CreateInstance<Graph>();
+        graph.GenerateGraph(Squares);
+
+        for (int i = 0; i < AgentSpawnNumber; i++) 
         {
-            var agent = SpawnEntity(Square.CenterPoint, AgentPrefab); // spawn enemy agent
+            int randomNumber = Random.Range(0, BoundrySquares.Count);
+            Debug.Log($"Random number: {randomNumber} i: {i}");
+            var square = BoundrySquares[randomNumber];
+            foreach (Graph.Vertex v in graph.Vertices) 
+            {
+                if (v.Coordinates == square.CenterPoint) 
+                {
+                    AgentStartingVertices.Add(v);
+                }
+            }
+        }
+        // select random boundry square
+        //iterate through vertices and select vertex where vertex.coordinates == square.centerpoint
+        // add to AgentStartingVertices
+
+        // spawn agents
+        foreach (Graph.Vertex v in AgentStartingVertices)
+        {
+            var agent = SpawnEntity(v.Coordinates, AgentPrefab); // spawn enemy agent
             var agentPathFinding = agent.GetComponent<PathFinding>();
-            agentPathFinding.StartingSquare = Square;
+            agentPathFinding.StartingVertex = v;
+            agentPathFinding.Vertices = graph.Vertices;
         }
 
         SpawnEntity(new(5, 0, 0), PlayerPrefab); // spawn player
@@ -52,19 +73,11 @@ public class GameManager : MonoBehaviour
 
         // set dimensions of tower
         Tower = Level.transform.Find("Tower");
-        Tower.localScale = new Vector3(1, 5, 1);
+        Tower.localScale = new Vector3(3, 5, 3);
         Tower.transform.position += Vector3.up * ((Tower.transform.localScale.y * 0.5f) - 0.5f);
 
         // generate grid of squares using platform transform
         GenerateGrid(Platform);
-
-        // select agent spawn positions
-        for (int i = 0; i < AgentSpawnNumber; i++)
-        {
-            int randomNumber = Random.Range(0, BoundrySquares.Count);
-            Debug.Log($"Random number: {randomNumber} i: {i}");
-            AgentStartingSquares.Add(BoundrySquares[randomNumber]);
-        }
     }
 
     private GameObject SpawnEntity(Vector3 location, GameObject prefab) 
