@@ -45,11 +45,17 @@ public class GameManager : MonoBehaviour
         // add to AgentStartingVertices
 
         // spawn agents
+        Debug.Log("AgentStartingVertices count= " + AgentStartingVertices.Count);
         foreach (Graph.Vertex v in AgentStartingVertices)
         {
             var agent = SpawnEntity(v.Coordinates, AgentPrefab); // spawn enemy agent
             var agentPathFinding = agent.GetComponent<PathFinding>();
             agentPathFinding.StartingVertex = v;
+            Debug.Log("Starting vertex coordinates = " + agentPathFinding.StartingVertex.Coordinates);
+            for (int i = 0; i < agentPathFinding.StartingVertex.Neighbours.Count; i++) 
+            {
+                Debug.Log("Neighbour = " + agentPathFinding.StartingVertex.Neighbours[i].Coordinates);
+            }
             agentPathFinding.Vertices = graph.Vertices;
         }
 

@@ -48,16 +48,19 @@ public class Graph : ScriptableObject
         public void AddEdge(Vertex vertexB) 
         {
             Neighbours.Add(vertexB);
-            vertexB.Neighbours.Add(this);
+            //vertexB.Neighbours.Add(this);
         }
 
         public bool IsNeighbour(Vertex vertexB) 
         {
-            if (vertexB.Coordinates.x == Coordinates.x + 1 || vertexB.Coordinates.x == Coordinates.x - 1 
-                || vertexB.Coordinates.z == Coordinates.z + 1 || vertexB.Coordinates.z == Coordinates.z - 1) 
+            if (vertexB.Coordinates.x == Coordinates.x || vertexB.Coordinates.z == Coordinates.z) // check if the two vertices share a mutual postition on either x or z axis
             {
-                return true;
-            }
+                if (vertexB.Coordinates.x == Coordinates.x + 1 || vertexB.Coordinates.x == Coordinates.x - 1
+               || vertexB.Coordinates.z == Coordinates.z + 1 || vertexB.Coordinates.z == Coordinates.z - 1)
+                {
+                    return true;
+                }
+            }           
             return false;
         }
     }
