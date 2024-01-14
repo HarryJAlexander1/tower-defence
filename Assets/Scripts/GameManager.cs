@@ -10,7 +10,7 @@ public class GameManager : MonoBehaviour
     private Transform Platform;
     private Transform Tower;
     private const int LevelDimension = 60;
-    private Vector3 LevelSpawnPosition = new(0, 0, 0);
+    private Vector3 LevelSpawnPosition = new(0, -0.5f, 0);
 
     private List<Square> BoundrySquares = new List<Square>();
     private static int AgentSpawnNumber = 1;
@@ -56,6 +56,7 @@ public class GameManager : MonoBehaviour
             }
             agentPathFinding.Vertices = graph.Vertices;
             agentPathFinding.FindShortestPath(agentPathFinding.StartingVertex, agentPathFinding.EndingVertex);
+            //agentPathFinding.StartExecution();
         }
 
         SpawnEntity(new(5, 0, 0), PlayerPrefab); // spawn player
@@ -94,7 +95,7 @@ public class GameManager : MonoBehaviour
 
     private void GenerateGrid(Transform platform)
     {
-        Vector3 position = new(-(platform.localScale.x * 0.5f), 1, -(platform.localScale.z * 0.5f));
+        Vector3 position = new(-(platform.localScale.x * 0.5f), 1.0f, -(platform.localScale.z * 0.5f));
         float minimum = -(Platform.localScale.x * 0.5f);
         float maximum = (Platform.localScale.x * 0.5f) - 1;
 

@@ -1,15 +1,21 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UIElements;
+using static UnityEngine.GraphicsBuffer;
 
 public class PathFinding : MonoBehaviour
 {
     public Graph.Vertex StartingVertex;
     public Graph.Vertex EndingVertex;
     public List<Graph.Vertex> Vertices;
-
-    private List<Graph.Vertex> Path;
+    private bool IsWalking = false;
+    private float Speed = 2.0f;
+    private int CurrentStep = 0;
+    private List<Graph.Vertex> Path = new List<Graph.Vertex>();
+    private bool BobbingUp = true;
     // Start is called before the first frame update
     void Awake()
     {
@@ -35,6 +41,7 @@ public class PathFinding : MonoBehaviour
             {
                 // Reconstruct the path from source to destination
                 Path = ReconstructPath(parent, source, destination);
+                return;
             }
 
             // Enqueue neighbors if not already visited
@@ -73,8 +80,90 @@ public class PathFinding : MonoBehaviour
         return path;
     }
     // Update is called once per frame
+
     void Update()
     {
+        if (Path.Count > 0) 
+        {
+            if (IsApproximatelyAtNode(Path[CurrentStep], 0.1f) && CurrentStep < Path.Count - 1) 
+            {
+                CurrentStep++;
+            }
+            MoveToNode(Path[CurrentStep]);
+            BobUpAndDown(2f);
+        }
+    }
 
+    public void StartExecution()
+    {
+        Debug.Log("Path count= " + Path.Count);
+        if (!IsWalking && Path.Count > 0)
+        {
+            StartCoroutine(TraversePath(Path));
+        }
+    }
+    private IEnumerator TraversePath(List<Graph.Vertex> path)
+    {
+        IsWalking = true;
+        
+        //MoveToNode(v);
+        yield return new WaitForSeconds(0.5f);
+
+        Path.Clear();
+        IsWalking = false;
+    }
+
+    private bool IsApproximatelyAtNode(Graph.Vertex node, float threshold)
+    {
+        if (Vector3.Distance(new(node.Coordinates.x, 0, node.Coordinates.z), new(transform.position.x, 0, transform.position.z)) < threshold)
+        {
+            return true;
+        }
+        // Debug.Log("Distance: " + Vector3.Distance(targetPosition, vector));
+        return false;
+    }
+
+    private void MoveToNode(Graph.Vertex node)
+    {
+        Vector3 direction = node.Coordinates - transform.position;
+
+        // Normalize the direction to get a unit vector
+        direction.Normalize();
+
+        // Move towards the target
+
+        transform.position += direction * Speed * Time.deltaTime;
+    }
+
+    private void BobUpAndDown(float speed)
+    {
+        float maxY = 1.5f;
+        float minY = 1f;
+
+        float moveSpeed = speed;
+
+        // Check if the object is moving up
+        if (BobbingUp)
+        {
+            // Move the object up
+            transform.Translate(moveSpeed * Time.deltaTime * Vector3.up);
+
+            // Check if the object has reached or exceeded the maximum y position
+            if (transform.localPosition.y >= maxY)
+            {
+                BobbingUp = false; // Switch to moving down
+            }
+        }
+        else
+        {
+            // Move the object down
+            transform.Translate(moveSpeed * Time.deltaTime * Vector3.down);
+
+            // Check if the object has reached or gone below the minimum y position
+            if (transform.localPosition.y <= minY)
+            {
+                BobbingUp = true; // Switch to moving up
+            }
+        }
     }
 }
