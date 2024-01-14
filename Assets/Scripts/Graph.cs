@@ -5,6 +5,7 @@ using UnityEngine;
 public class Graph : ScriptableObject
 {
     public List<Vertex> Vertices { get; set; }
+    public Vertex Center { get; set; }
 
     public void GenerateGraph(List<GameManager.Square> squares) 
     {
@@ -33,6 +34,12 @@ public class Graph : ScriptableObject
 
     private Vertex ConstructVertex(GameManager.Square square) 
     {
+        if (square.CenterPoint == new Vector3(0.5f, 1, 0.5f)) 
+        {
+            Center = new Vertex(square.CenterPoint);
+            Debug.Log("Center= " + Center.Coordinates);
+            return Center;            
+        }
         return new Vertex(square.CenterPoint);
     }
 

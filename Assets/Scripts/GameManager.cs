@@ -40,9 +40,6 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
-        // select random boundry square
-        //iterate through vertices and select vertex where vertex.coordinates == square.centerpoint
-        // add to AgentStartingVertices
 
         // spawn agents
         Debug.Log("AgentStartingVertices count= " + AgentStartingVertices.Count);
@@ -51,12 +48,14 @@ public class GameManager : MonoBehaviour
             var agent = SpawnEntity(v.Coordinates, AgentPrefab); // spawn enemy agent
             var agentPathFinding = agent.GetComponent<PathFinding>();
             agentPathFinding.StartingVertex = v;
+            agentPathFinding.EndingVertex = graph.Center;
             Debug.Log("Starting vertex coordinates = " + agentPathFinding.StartingVertex.Coordinates);
             for (int i = 0; i < agentPathFinding.StartingVertex.Neighbours.Count; i++) 
             {
                 Debug.Log("Neighbour = " + agentPathFinding.StartingVertex.Neighbours[i].Coordinates);
             }
             agentPathFinding.Vertices = graph.Vertices;
+            agentPathFinding.FindShortestPath(agentPathFinding.StartingVertex, agentPathFinding.EndingVertex);
         }
 
         SpawnEntity(new(5, 0, 0), PlayerPrefab); // spawn player
