@@ -11,62 +11,64 @@ public class GameManager : MonoBehaviour
     private Transform Platform;
     private Transform Tower;
     private const int LevelDimension = 60;
-    private Vector3 LevelSpawnPosition = new(0, -0.5f, 0);
+    private Vector3 LevelSpawnPosition;
 
-    private List<Square> BoundrySquares = new List<Square>();
-    private static int AgentSpawnNumber = 1;
-    public List<Graph.Vertex> AgentStartingVertices = new List<Graph.Vertex>();
+    private List<Square> BoundrySquares;
+    private static int AgentSpawnNumber;
+    public List<Graph.Vertex> AgentStartingVertices;
     public GameObject AgentPrefab;
-    public List<Square> Squares = new List<Square>();
+    public List<Square> Squares;
  
     public GameObject PlayerPrefab;
 
     // Start is called before the first frame update
     void Start()
     {
+        LevelSpawnPosition = new(0, -0.5f, 0);
+        BoundrySquares = new List<Square>();
+        AgentSpawnNumber = 1;
+        AgentStartingVertices = new List<Graph.Vertex>();
+        Squares = new List<Square>();
         CreateLevel();
         Graph graph = ScriptableObject.CreateInstance<Graph>();
         graph.GenerateGraph(Squares);
-
-        for (int i = 0; i < AgentSpawnNumber; i++) 
-        {
-            int randomNumber = Random.Range(0, BoundrySquares.Count);
-            Debug.Log($"Random number: {randomNumber} i: {i}");
-            var square = BoundrySquares[randomNumber];
-            foreach (Graph.Vertex v in graph.Vertices) 
-            {
-                if (v.Coordinates == square.CenterPoint) 
-                {
-                    AgentStartingVertices.Add(v);
-                }
-            }
-        }
-
-        // spawn agents
-        Debug.Log("AgentStartingVertices count= " + AgentStartingVertices.Count);
-        foreach (Graph.Vertex v in AgentStartingVertices)
-        {
-            var agent = SpawnEntity(v.Coordinates, AgentPrefab); // spawn enemy agent
-            var agentPathFinding = agent.GetComponent<PathFinding>();
-            agentPathFinding.StartingVertex = v;
-            agentPathFinding.EndingVertex = graph.Center;
-            Debug.Log("Starting vertex coordinates = " + agentPathFinding.StartingVertex.Coordinates);
-            for (int i = 0; i < agentPathFinding.StartingVertex.Neighbours.Count; i++) 
-            {
-                Debug.Log("Neighbour = " + agentPathFinding.StartingVertex.Neighbours[i].Coordinates);
-            }
-            agentPathFinding.Vertices = graph.Vertices;
-            agentPathFinding.FindShortestPath(agentPathFinding.StartingVertex, agentPathFinding.EndingVertex);
-            //agentPathFinding.StartExecution();
-        }
-
+        GenerateAgentSpawnPositions(graph);
+        SpawnAgents(graph);
         SpawnEntity(new(5, 0, 0), PlayerPrefab); // spawn player
     }
 
     // Update is called once per frame
     void Update()
     {
+        StartExecution();
+    }
 
+    private void GenerateAgentSpawnPositions(Graph graph) 
+    {
+        for (int i = 0; i < AgentSpawnNumber; i++)
+        {
+            int randomNumber = Random.Range(0, BoundrySquares.Count);
+            var square = BoundrySquares[randomNumber];
+            foreach (Graph.Vertex v in graph.Vertices)
+            {
+                if (v.Coordinates == square.CenterPoint)
+                {
+                    AgentStartingVertices.Add(v);
+                }
+            }
+        }
+    }
+    private void SpawnAgents(Graph graph) 
+    {
+        foreach (Graph.Vertex v in AgentStartingVertices)
+        {
+            var agent = SpawnEntity(v.Coordinates, AgentPrefab);
+            var agentPathFinding = agent.GetComponent<PathFinding>();
+            agentPathFinding.StartingVertex = v;
+            agentPathFinding.EndingVertex = graph.Center;
+            agentPathFinding.Vertices = graph.Vertices;
+            agentPathFinding.FindShortestPath(agentPathFinding.StartingVertex, agentPathFinding.EndingVertex);
+        }
     }
     public void StartExecution()
     {
