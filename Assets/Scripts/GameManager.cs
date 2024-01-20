@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -67,7 +68,14 @@ public class GameManager : MonoBehaviour
     {
 
     }
-
+    public void StartExecution()
+    {
+        StartCoroutine(SpawnEnemies());
+    }
+    private IEnumerator SpawnEnemies()
+    {
+        yield return new WaitForSeconds(0.5f);
+    }
     private void CreateLevel()
     {
         // instantiate level gameobject

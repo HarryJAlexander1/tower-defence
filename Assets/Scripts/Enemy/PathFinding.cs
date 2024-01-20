@@ -11,16 +11,23 @@ public class PathFinding : MonoBehaviour
     public Graph.Vertex StartingVertex;
     public Graph.Vertex EndingVertex;
     public List<Graph.Vertex> Vertices;
-    private bool IsWalking = false;
     private float Speed = 2.0f;
     private int CurrentStep = 0;
     private List<Graph.Vertex> Path = new List<Graph.Vertex>();
     private bool BobbingUp = true;
-    // Start is called before the first frame update
-    void Awake()
-    {
-    }
 
+    void Update()
+    {
+        if (Path.Count > 0)
+        {
+            if (IsApproximatelyAtNode(Path[CurrentStep], 0.1f) && CurrentStep < Path.Count - 1)
+            {
+                CurrentStep++;
+            }
+            MoveToNode(Path[CurrentStep]);
+            BobUpAndDown(2f);
+        }
+    }
     public void FindShortestPath(Graph.Vertex source, Graph.Vertex destination)
     {
         // Initialize the queue for BFS
@@ -79,40 +86,6 @@ public class PathFinding : MonoBehaviour
         }
         return path;
     }
-    // Update is called once per frame
-
-    void Update()
-    {
-        if (Path.Count > 0) 
-        {
-            if (IsApproximatelyAtNode(Path[CurrentStep], 0.1f) && CurrentStep < Path.Count - 1) 
-            {
-                CurrentStep++;
-            }
-            MoveToNode(Path[CurrentStep]);
-            BobUpAndDown(2f);
-        }
-    }
-
-    public void StartExecution()
-    {
-        Debug.Log("Path count= " + Path.Count);
-        if (!IsWalking && Path.Count > 0)
-        {
-            StartCoroutine(TraversePath(Path));
-        }
-    }
-    private IEnumerator TraversePath(List<Graph.Vertex> path)
-    {
-        IsWalking = true;
-        
-        //MoveToNode(v);
-        yield return new WaitForSeconds(0.5f);
-
-        Path.Clear();
-        IsWalking = false;
-    }
-
     private bool IsApproximatelyAtNode(Graph.Vertex node, float threshold)
     {
         if (Vector3.Distance(new(node.Coordinates.x, 0, node.Coordinates.z), new(transform.position.x, 0, transform.position.z)) < threshold)
