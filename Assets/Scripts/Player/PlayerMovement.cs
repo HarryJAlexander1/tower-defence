@@ -93,15 +93,12 @@ public class PlayerMovement : MonoBehaviour
 
         if (transform.position != PreviousPosition)
         {
-            // The parent GameObject is moving.
-            Debug.Log("Player is moving!");
             IsMoving = true;
             // Update the previous position for the next frame.
             PreviousPosition = transform.position;
         }
         else
         {
-            Debug.Log("Player is stationary");
             IsMoving = false;
         }
 
