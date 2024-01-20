@@ -37,7 +37,6 @@ public class Graph : ScriptableObject
         if (square.CenterPoint == new Vector3(0.5f, 1, 0.5f)) 
         {
             Center = new Vertex(square.CenterPoint);
-            Debug.Log("Center= " + Center.Coordinates);
             return Center;            
         }
         return new Vertex(square.CenterPoint);

@@ -11,12 +11,24 @@ public class PathFinding : MonoBehaviour
     public Graph.Vertex StartingVertex;
     public Graph.Vertex EndingVertex;
     public List<Graph.Vertex> Vertices;
-    private float Speed = 2.0f;
-    private int CurrentStep = 0;
-    private List<Graph.Vertex> Path = new List<Graph.Vertex>();
-    private bool BobbingUp = true;
+    private float Speed;
+    private int CurrentStep;
+    private List<Graph.Vertex> Path;
+    private bool BobbingUp;
 
+    private void Awake()
+    {
+        BobbingUp = true;
+        Path = new List<Graph.Vertex>();
+        CurrentStep = 0;
+        Speed = 2.0f;
+    }
     void Update()
+    {
+        TraverseGraph();
+    }
+
+    private void TraverseGraph() 
     {
         if (Path.Count > 0)
         {
@@ -92,7 +104,6 @@ public class PathFinding : MonoBehaviour
         {
             return true;
         }
-        // Debug.Log("Distance: " + Vector3.Distance(targetPosition, vector));
         return false;
     }
 
@@ -104,7 +115,6 @@ public class PathFinding : MonoBehaviour
         direction.Normalize();
 
         // Move towards the target
-
         transform.position += direction * Speed * Time.deltaTime;
     }
 
