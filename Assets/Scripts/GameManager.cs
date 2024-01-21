@@ -19,11 +19,14 @@ public class GameManager : MonoBehaviour
     public GameObject AgentPrefab;
     public List<Square> Squares;
     public GameObject PlayerPrefab;
-    private bool IsAttackSequence = false;
+    private bool IsAttackSequence;
+    private int LevelCount;
 
     // Start is called before the first frame update
     void Start()
     {
+        IsAttackSequence = false;
+        LevelCount = 0;
         LevelSpawnPosition = new(0, -0.5f, 0);
         BoundrySquares = new List<Square>();
         AgentSpawnNumber = 20;
@@ -37,8 +40,19 @@ public class GameManager : MonoBehaviour
     {
         if (!IsAttackSequence && Input.GetKeyDown(KeyCode.G)) 
         {
+            LevelCount++;
             IsAttackSequence = true;
             ExecuteAttackSequence();
+        }
+
+        PlaceBlock();
+    }
+
+    private void PlaceBlock() 
+    {
+        if (!IsAttackSequence) 
+        {
+
         }
     }
 
