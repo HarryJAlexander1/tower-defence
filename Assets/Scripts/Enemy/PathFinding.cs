@@ -37,6 +37,12 @@ public class PathFinding : MonoBehaviour
                 CurrentStep++;
             }
             MoveToNode(Path[CurrentStep]);
+
+            if (CurrentStep == Path.Count - 1) 
+            {
+                Destroy(gameObject);
+            }
+           
             BobUpAndDown(2f);
         }
     }
