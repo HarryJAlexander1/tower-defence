@@ -12,71 +12,91 @@ public class GameManager : MonoBehaviour
     private Transform Tower;
     private const int LevelDimension = 60;
     private Vector3 LevelSpawnPosition;
-
     private List<Square> BoundrySquares;
     private static int AgentSpawnNumber;
-    public List<Graph.Vertex> AgentStartingVertices;
+    Graph Graph;
+    public Graph.Vertex AgentStartingVertex;
     public GameObject AgentPrefab;
     public List<Square> Squares;
- 
     public GameObject PlayerPrefab;
+    private bool IsAttackSequence;
+    private int LevelCount;
 
     // Start is called before the first frame update
     void Start()
     {
+        IsAttackSequence = false;
+        LevelCount = 0;
         LevelSpawnPosition = new(0, -0.5f, 0);
         BoundrySquares = new List<Square>();
-        AgentSpawnNumber = 1;
-        AgentStartingVertices = new List<Graph.Vertex>();
+        AgentSpawnNumber = 20;
         Squares = new List<Square>();
         CreateLevel();
-        Graph graph = ScriptableObject.CreateInstance<Graph>();
-        graph.GenerateGraph(Squares);
-        GenerateAgentSpawnPositions(graph);
-        SpawnAgents(graph);
+        Graph = ScriptableObject.CreateInstance<Graph>();
         SpawnEntity(new(5, 0, 0), PlayerPrefab); // spawn player
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        StartExecution();
+        if (!IsAttackSequence && Input.GetKeyDown(KeyCode.G)) 
+        {
+            LevelCount++;
+            IsAttackSequence = true;
+            ExecuteAttackSequence();
+        }
+
+        PlaceBlock();
     }
 
-    private void GenerateAgentSpawnPositions(Graph graph) 
+    private void PlaceBlock() 
     {
+        if (!IsAttackSequence) 
+        {
+
+        }
+    }
+
+    private void ExecuteAttackSequence() 
+    {
+        Graph.GenerateGraph(Squares);
+        GenerateAgentSpawnPosition(Graph);
+        StartExecution();
+    }
+    private void GenerateAgentSpawnPosition(Graph graph) 
+    {
+        int randomNumber = Random.Range(0, BoundrySquares.Count);
+        var square = BoundrySquares[randomNumber];
+
         for (int i = 0; i < AgentSpawnNumber; i++)
         {
-            int randomNumber = Random.Range(0, BoundrySquares.Count);
-            var square = BoundrySquares[randomNumber];
             foreach (Graph.Vertex v in graph.Vertices)
             {
                 if (v.Coordinates == square.CenterPoint)
                 {
-                    AgentStartingVertices.Add(v);
+                    AgentStartingVertex = v;
+                    break;
                 }
             }
         }
     }
-    private void SpawnAgents(Graph graph) 
+
+    public void StartExecution()
     {
-        foreach (Graph.Vertex v in AgentStartingVertices)
+        StartCoroutine(SpawnEnemies(Graph));
+    }
+    private IEnumerator SpawnEnemies(Graph graph)
+    {
+        for (int agentNumber = 0; agentNumber < AgentSpawnNumber; agentNumber++)
         {
-            var agent = SpawnEntity(v.Coordinates, AgentPrefab);
+            var agent = SpawnEntity(AgentStartingVertex.Coordinates, AgentPrefab);
             var agentPathFinding = agent.GetComponent<PathFinding>();
-            agentPathFinding.StartingVertex = v;
+            agentPathFinding.StartingVertex = AgentStartingVertex;
             agentPathFinding.EndingVertex = graph.Center;
             agentPathFinding.Vertices = graph.Vertices;
             agentPathFinding.FindShortestPath(agentPathFinding.StartingVertex, agentPathFinding.EndingVertex);
+            yield return new WaitForSeconds(3f);
         }
-    }
-    public void StartExecution()
-    {
-        StartCoroutine(SpawnEnemies());
-    }
-    private IEnumerator SpawnEnemies()
-    {
-        yield return new WaitForSeconds(0.5f);
+        IsAttackSequence = false;
     }
     private void CreateLevel()
     {
