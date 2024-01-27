@@ -153,8 +153,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LevelPrefab: {fileID: 8671284200171513952, guid: 85874f64434e3884582207a7c3eb5ec6, type: 3}
+  BlockPrefab: {fileID: 3692484879116683474, guid: b09454c799c29764cb97c29b1283d26a, type: 3}
   AgentPrefab: {fileID: 5986678848766578628, guid: 1202540420c761b45a816f2a628ce32d, type: 3}
   PlayerPrefab: {fileID: 9039848750659920738, guid: 1619a62a7a1a34d4fbc67d938d538fda, type: 3}
+  IsAttackSequence: 0
 --- !u!4 &129125701
 Transform:
   m_ObjectHideFlags: 0

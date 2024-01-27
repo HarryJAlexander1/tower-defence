@@ -10,6 +10,7 @@ public class GameManager : MonoBehaviour
     private GameObject Level;
     private Transform Platform;
     private Transform Tower;
+    public GameObject BlockPrefab;
     private const int LevelDimension = 60;
     private Vector3 LevelSpawnPosition;
     private List<Square> BoundrySquares;
@@ -19,7 +20,7 @@ public class GameManager : MonoBehaviour
     public GameObject AgentPrefab;
     public List<Square> Squares;
     public GameObject PlayerPrefab;
-    private bool IsAttackSequence;
+    public bool IsAttackSequence;
     private int LevelCount;
 
     // Start is called before the first frame update
@@ -33,6 +34,7 @@ public class GameManager : MonoBehaviour
         Squares = new List<Square>();
         CreateLevel();
         Graph = ScriptableObject.CreateInstance<Graph>();
+        Graph.GenerateGraph(Squares);
         SpawnEntity(new(5, 0, 0), PlayerPrefab); // spawn player
     }
 
@@ -44,21 +46,35 @@ public class GameManager : MonoBehaviour
             IsAttackSequence = true;
             ExecuteAttackSequence();
         }
-
-        PlaceBlock();
     }
-
-    private void PlaceBlock() 
+    public void PlaceBlockOnNearestEmptyVertex(Vector3 rayCastHitPosition)
     {
-        if (!IsAttackSequence) 
-        {
+        float smallestDistance = Mathf.Infinity;
+        Graph.Vertex nearestVertex = null;
 
+        foreach (Graph.Vertex vertex in Graph.Vertices)
+        {
+            float distance = Vector3.Distance(vertex.Coordinates, rayCastHitPosition);
+
+            if (distance < smallestDistance)
+            {
+                smallestDistance = distance;
+                nearestVertex = vertex;
+            }
         }
+        Instantiate(BlockPrefab, nearestVertex.Coordinates - (Vector3.up * 0.5f), Quaternion.identity);
+        // remove this vertex from its neighbours 'neighbours' list
+        foreach (Graph.Vertex neighbour in nearestVertex.Neighbours) 
+        {
+            neighbour.Neighbours.Remove(nearestVertex);
+        }
+
+        Graph.Vertices.Remove(nearestVertex);
     }
 
     private void ExecuteAttackSequence() 
     {
-        Graph.GenerateGraph(Squares);
+        //Graph.GenerateGraph(Squares);
         GenerateAgentSpawnPosition(Graph);
         StartExecution();
     }
@@ -82,17 +98,17 @@ public class GameManager : MonoBehaviour
 
     public void StartExecution()
     {
-        StartCoroutine(SpawnEnemies(Graph));
+        StartCoroutine(SpawnEnemies());
     }
-    private IEnumerator SpawnEnemies(Graph graph)
+    private IEnumerator SpawnEnemies()
     {
         for (int agentNumber = 0; agentNumber < AgentSpawnNumber; agentNumber++)
         {
             var agent = SpawnEntity(AgentStartingVertex.Coordinates, AgentPrefab);
             var agentPathFinding = agent.GetComponent<PathFinding>();
             agentPathFinding.StartingVertex = AgentStartingVertex;
-            agentPathFinding.EndingVertex = graph.Center;
-            agentPathFinding.Vertices = graph.Vertices;
+            agentPathFinding.EndingVertex = Graph.Center;
+            agentPathFinding.Vertices = Graph.Vertices;
             agentPathFinding.FindShortestPath(agentPathFinding.StartingVertex, agentPathFinding.EndingVertex);
             yield return new WaitForSeconds(3f);
         }
