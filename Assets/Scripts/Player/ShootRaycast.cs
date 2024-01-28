@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.PackageManager;
 using UnityEngine;
 
 public class ShootRaycast : MonoBehaviour
@@ -19,13 +20,17 @@ public class ShootRaycast : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonDown(0)) 
+        if (Input.GetMouseButtonDown(0))
         {
-            FireRaycast();
+            FireRaycast(false);
+        }
+        else if (Input.GetMouseButtonDown(1)) 
+        {
+            FireRaycast(true);
         }
     }
 
-    private void FireRaycast() 
+    private void FireRaycast(bool rightClickPressed) 
     {
         Vector3 raycastOrigin = transform.position;
         Vector3 raycastDirection = transform.forward;
@@ -37,12 +42,32 @@ public class ShootRaycast : MonoBehaviour
         if (Physics.Raycast(ray, out hitInfo, RaycastDistance))
         {
             Debug.Log("Hit: " + hitInfo.point);
-            GameManager.PlaceBlockOnNearestEmptyVertex(hitInfo.point);
+            if (!GameManager.IsAttackSequence) 
+            {
+                ManageBlocks(hitInfo, rightClickPressed);
+            }     
         }
         else
         {
             // If the ray doesn't hit anything, you can handle that case here
             Debug.Log("No hit");
+        }
+    }
+    private void ManageBlocks(RaycastHit hitInfo, bool removeBlock) 
+    {
+        if (removeBlock)
+        {
+            if (hitInfo.collider.gameObject.CompareTag("Block"))
+            {
+                GameManager.RemoveBlock(hitInfo.point, hitInfo.collider.gameObject);
+            }
+        }
+        else
+        {
+            if (hitInfo.collider.gameObject.CompareTag("Floor"))
+            {
+                GameManager.PlaceBlockOnNearestEmptyVertex(hitInfo.point);
+            }
         }
     }
 }

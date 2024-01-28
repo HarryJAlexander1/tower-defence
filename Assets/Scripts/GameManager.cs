@@ -47,12 +47,13 @@ public class GameManager : MonoBehaviour
             ExecuteAttackSequence();
         }
     }
-    public void PlaceBlockOnNearestEmptyVertex(Vector3 rayCastHitPosition)
+
+    private Graph.Vertex FindNearestVertex(Vector3 rayCastHitPosition, List<Graph.Vertex> VerticesList) 
     {
         float smallestDistance = Mathf.Infinity;
         Graph.Vertex nearestVertex = null;
 
-        foreach (Graph.Vertex vertex in Graph.Vertices)
+        foreach (Graph.Vertex vertex in VerticesList)
         {
             float distance = Vector3.Distance(vertex.Coordinates, rayCastHitPosition);
 
@@ -62,14 +63,31 @@ public class GameManager : MonoBehaviour
                 nearestVertex = vertex;
             }
         }
-        Instantiate(BlockPrefab, nearestVertex.Coordinates - (Vector3.up * 0.5f), Quaternion.identity);
-        // remove this vertex from its neighbours 'neighbours' list
-        foreach (Graph.Vertex neighbour in nearestVertex.Neighbours) 
+        return nearestVertex;
+    }
+    public void PlaceBlockOnNearestEmptyVertex(Vector3 rayCastHitPosition)
+    {
+        Graph.Vertex nearestVertex = FindNearestVertex(rayCastHitPosition, Graph.Vertices);
+        Instantiate(BlockPrefab, nearestVertex.Coordinates - (Vector3.up * 0.5f), Quaternion.identity);   
+        foreach (Graph.Vertex neighbour in nearestVertex.Neighbours)   // remove this vertex from its neighbours 'neighbours' list
         {
             neighbour.Neighbours.Remove(nearestVertex);
         }
 
         Graph.Vertices.Remove(nearestVertex);
+        Graph.RemovedVertices.Add(nearestVertex);
+    }
+
+    public void RemoveBlock(Vector3 rayCastHitPosition, GameObject block) 
+    {
+        Destroy(block); // remove block from level
+        Graph.Vertex nearestVertex = FindNearestVertex(rayCastHitPosition, Graph.RemovedVertices); // find closest vertex in removed vertices list
+        Graph.Vertices.Add(nearestVertex);
+        Graph.RemovedVertices.Remove(nearestVertex);
+        foreach (Graph.Vertex neighbour in nearestVertex.Neighbours)   // remove this vertex from its neighbours 'neighbours' list
+        {
+            neighbour.Neighbours.Add(nearestVertex);
+        }
     }
 
     private void ExecuteAttackSequence() 

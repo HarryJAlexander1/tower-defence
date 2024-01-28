@@ -5,11 +5,13 @@ using UnityEngine;
 public class Graph : ScriptableObject
 {
     public List<Vertex> Vertices { get; set; }
+    public List<Vertex> RemovedVertices { get; set; }
     public Vertex Center { get; set; }
 
     public void GenerateGraph(List<GameManager.Square> squares) 
     {
         Vertices = new List<Vertex>();  
+        RemovedVertices = new List<Vertex>();
         // construct vertices from squares
         foreach (GameManager.Square square in squares) 
         {
