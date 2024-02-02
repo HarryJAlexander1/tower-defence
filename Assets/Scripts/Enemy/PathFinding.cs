@@ -15,6 +15,8 @@ public class PathFinding : MonoBehaviour
     private int CurrentStep;
     private List<Graph.Vertex> Path;
     private bool BobbingUp;
+    private GameObject GameManagerObject;
+    private GameManager GameManagerScript;
 
     private void Awake()
     {
@@ -22,6 +24,8 @@ public class PathFinding : MonoBehaviour
         Path = new List<Graph.Vertex>();
         CurrentStep = 0;
         Speed = 2.0f;
+        GameManagerObject = GameObject.FindGameObjectWithTag("GameManager");
+        GameManagerScript = GameManagerObject.GetComponent<GameManager>();
     }
     void Update()
     {
@@ -40,6 +44,7 @@ public class PathFinding : MonoBehaviour
 
             if (CurrentStep == Path.Count - 1) 
             {
+                GameManagerScript.CheckAgentsExist();
                 Destroy(gameObject);
             }
            

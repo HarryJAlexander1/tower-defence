@@ -22,10 +22,12 @@ public class GameManager : MonoBehaviour
     public GameObject PlayerPrefab;
     public bool IsAttackSequence;
     private int LevelCount;
+    public bool AgentExists;
 
     // Start is called before the first frame update
     void Start()
     {
+        AgentExists = false;
         IsAttackSequence = false;
         LevelCount = 0;
         LevelSpawnPosition = new(0, -0.5f, 0);
@@ -40,12 +42,17 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        if (!IsAttackSequence && Input.GetKeyDown(KeyCode.G)) 
+        if (!IsAttackSequence && Input.GetKeyDown(KeyCode.G) && !AgentExists) 
         {
             LevelCount++;
             IsAttackSequence = true;
             ExecuteAttackSequence();
         }
+    }
+
+    public void CheckAgentsExist() 
+    {
+        AgentExists = GameObject.FindGameObjectsWithTag("Agent").Length > 1;
     }
 
     private Graph.Vertex FindNearestVertex(Vector3 rayCastHitPosition, List<Graph.Vertex> VerticesList) 
@@ -128,6 +135,7 @@ public class GameManager : MonoBehaviour
             agentPathFinding.EndingVertex = Graph.Center;
             agentPathFinding.Vertices = Graph.Vertices;
             agentPathFinding.FindShortestPath(agentPathFinding.StartingVertex, agentPathFinding.EndingVertex);
+            AgentExists = true;
             yield return new WaitForSeconds(3f);
         }
         IsAttackSequence = false;

@@ -8,7 +8,6 @@ public class ShootRaycast : MonoBehaviour
     GameObject GameManagerObject;
     GameManager GameManager;
     private float RaycastDistance;
-    private List<Graph.Vertex> Vertices;
     // Start is called before the first frame update
     void Awake()
     {
@@ -42,7 +41,7 @@ public class ShootRaycast : MonoBehaviour
         if (Physics.Raycast(ray, out hitInfo, RaycastDistance))
         {
             Debug.Log("Hit: " + hitInfo.point);
-            if (!GameManager.IsAttackSequence) 
+            if (!GameManager.IsAttackSequence && !GameManager.AgentExists) 
             {
                 ManageBlocks(hitInfo, rightClickPressed);
             }     
