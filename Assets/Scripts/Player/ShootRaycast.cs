@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEditor.PackageManager;
 using UnityEngine;
 
@@ -40,16 +41,28 @@ public class ShootRaycast : MonoBehaviour
         RaycastHit hitInfo;
         if (Physics.Raycast(ray, out hitInfo, RaycastDistance))
         {
-            Debug.Log("Hit: " + hitInfo.point);
-            if (!GameManager.IsAttackSequence && !GameManager.AgentExists) 
+            if (!GameManager.IsAttackSequence && !GameManager.AgentExists)
             {
                 ManageBlocks(hitInfo, rightClickPressed);
-            }     
+            }
+            else 
+            {
+                ManageHitOnEnemy(hitInfo);
+            }
         }
         else
         {
-            // If the ray doesn't hit anything, you can handle that case here
             Debug.Log("No hit");
+        }
+    }
+
+    private void ManageHitOnEnemy(RaycastHit hitInfo) 
+    {
+        if (hitInfo.collider.gameObject.CompareTag("AgentBody")) 
+        {
+            AgentBehaviour agentBehaviour = hitInfo.collider.gameObject.GetComponentInParent<AgentBehaviour>();
+            agentBehaviour.Hitpoints--;
+            Debug.Log(agentBehaviour.Hitpoints);
         }
     }
     private void ManageBlocks(RaycastHit hitInfo, bool removeBlock) 
@@ -59,13 +72,15 @@ public class ShootRaycast : MonoBehaviour
             if (hitInfo.collider.gameObject.CompareTag("Block"))
             {
                 GameManager.RemoveBlock(hitInfo.point, hitInfo.collider.gameObject);
+                GameManager.Fund += 5;
             }
         }
         else
         {
-            if (hitInfo.collider.gameObject.CompareTag("Floor"))
+            if (hitInfo.collider.gameObject.CompareTag("Floor") && GameManager.Fund >= 10)
             {
                 GameManager.PlaceBlockOnNearestEmptyVertex(hitInfo.point);
+                GameManager.Fund -= 10;
             }
         }
     }

@@ -23,10 +23,11 @@ public class GameManager : MonoBehaviour
     public bool IsAttackSequence;
     private int LevelCount;
     public bool AgentExists;
-
+    public int Fund;
     // Start is called before the first frame update
     void Start()
     {
+        Fund = 0;
         AgentExists = false;
         IsAttackSequence = false;
         LevelCount = 0;
@@ -130,11 +131,11 @@ public class GameManager : MonoBehaviour
         for (int agentNumber = 0; agentNumber < AgentSpawnNumber; agentNumber++)
         {
             var agent = SpawnEntity(AgentStartingVertex.Coordinates, AgentPrefab);
-            var agentPathFinding = agent.GetComponent<PathFinding>();
-            agentPathFinding.StartingVertex = AgentStartingVertex;
-            agentPathFinding.EndingVertex = Graph.Center;
-            agentPathFinding.Vertices = Graph.Vertices;
-            agentPathFinding.FindShortestPath(agentPathFinding.StartingVertex, agentPathFinding.EndingVertex);
+            var agentBehaviour = agent.GetComponent<AgentBehaviour>();
+            agentBehaviour.StartingVertex = AgentStartingVertex;
+            agentBehaviour.EndingVertex = Graph.Center;
+            agentBehaviour.Vertices = Graph.Vertices;
+            agentBehaviour.FindShortestPath(agentBehaviour.StartingVertex, agentBehaviour.EndingVertex);
             AgentExists = true;
             yield return new WaitForSeconds(3f);
         }

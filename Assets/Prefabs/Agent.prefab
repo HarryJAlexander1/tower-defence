@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 5907920039279301517}
   m_Layer: 0
   m_Name: Body
-  m_TagString: Untagged
+  m_TagString: AgentBody
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -152,3 +152,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6787b8742ba814d4b93eab6966b89ae2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Hitpoints: 0

@@ -8,6 +8,7 @@ TagManager:
   - Floor
   - Agent
   - GameManager
+  - AgentBody
   layers:
   - Default
   - TransparentFX
