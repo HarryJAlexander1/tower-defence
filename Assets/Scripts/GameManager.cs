@@ -10,6 +10,7 @@ public class GameManager : MonoBehaviour
     private GameObject Level;
     private Transform Platform;
     private Transform Tower;
+    public GameObject BlockPrefab;
     private const int LevelDimension = 60;
     private Vector3 LevelSpawnPosition;
     private List<Square> BoundrySquares;
@@ -19,12 +20,15 @@ public class GameManager : MonoBehaviour
     public GameObject AgentPrefab;
     public List<Square> Squares;
     public GameObject PlayerPrefab;
-    private bool IsAttackSequence;
+    public bool IsAttackSequence;
     private int LevelCount;
-
+    public bool AgentExists;
+    public int Fund;
     // Start is called before the first frame update
     void Start()
     {
+        Fund = 0;
+        AgentExists = false;
         IsAttackSequence = false;
         LevelCount = 0;
         LevelSpawnPosition = new(0, -0.5f, 0);
@@ -33,32 +37,70 @@ public class GameManager : MonoBehaviour
         Squares = new List<Square>();
         CreateLevel();
         Graph = ScriptableObject.CreateInstance<Graph>();
+        Graph.GenerateGraph(Squares);
         SpawnEntity(new(5, 0, 0), PlayerPrefab); // spawn player
     }
 
     private void Update()
     {
-        if (!IsAttackSequence && Input.GetKeyDown(KeyCode.G)) 
+        if (!IsAttackSequence && Input.GetKeyDown(KeyCode.G) && !AgentExists) 
         {
             LevelCount++;
             IsAttackSequence = true;
             ExecuteAttackSequence();
         }
-
-        PlaceBlock();
     }
 
-    private void PlaceBlock() 
+    public void CheckAgentsExist() 
     {
-        if (!IsAttackSequence) 
-        {
+        AgentExists = GameObject.FindGameObjectsWithTag("Agent").Length > 1;
+    }
 
+    private Graph.Vertex FindNearestVertex(Vector3 rayCastHitPosition, List<Graph.Vertex> VerticesList) 
+    {
+        float smallestDistance = Mathf.Infinity;
+        Graph.Vertex nearestVertex = null;
+
+        foreach (Graph.Vertex vertex in VerticesList)
+        {
+            float distance = Vector3.Distance(vertex.Coordinates, rayCastHitPosition);
+
+            if (distance < smallestDistance)
+            {
+                smallestDistance = distance;
+                nearestVertex = vertex;
+            }
+        }
+        return nearestVertex;
+    }
+    public void PlaceBlockOnNearestEmptyVertex(Vector3 rayCastHitPosition)
+    {
+        Graph.Vertex nearestVertex = FindNearestVertex(rayCastHitPosition, Graph.Vertices);
+        Instantiate(BlockPrefab, nearestVertex.Coordinates - (Vector3.up * 0.5f), Quaternion.identity);   
+        foreach (Graph.Vertex neighbour in nearestVertex.Neighbours)   // remove this vertex from its neighbours 'neighbours' list
+        {
+            neighbour.Neighbours.Remove(nearestVertex);
+        }
+
+        Graph.Vertices.Remove(nearestVertex);
+        Graph.RemovedVertices.Add(nearestVertex);
+    }
+
+    public void RemoveBlock(Vector3 rayCastHitPosition, GameObject block) 
+    {
+        Destroy(block); // remove block from level
+        Graph.Vertex nearestVertex = FindNearestVertex(rayCastHitPosition, Graph.RemovedVertices); // find closest vertex in removed vertices list
+        Graph.Vertices.Add(nearestVertex);
+        Graph.RemovedVertices.Remove(nearestVertex);
+        foreach (Graph.Vertex neighbour in nearestVertex.Neighbours)   // remove this vertex from its neighbours 'neighbours' list
+        {
+            neighbour.Neighbours.Add(nearestVertex);
         }
     }
 
     private void ExecuteAttackSequence() 
     {
-        Graph.GenerateGraph(Squares);
+        //Graph.GenerateGraph(Squares);
         GenerateAgentSpawnPosition(Graph);
         StartExecution();
     }
@@ -82,18 +124,19 @@ public class GameManager : MonoBehaviour
 
     public void StartExecution()
     {
-        StartCoroutine(SpawnEnemies(Graph));
+        StartCoroutine(SpawnEnemies());
     }
-    private IEnumerator SpawnEnemies(Graph graph)
+    private IEnumerator SpawnEnemies()
     {
         for (int agentNumber = 0; agentNumber < AgentSpawnNumber; agentNumber++)
         {
             var agent = SpawnEntity(AgentStartingVertex.Coordinates, AgentPrefab);
-            var agentPathFinding = agent.GetComponent<PathFinding>();
-            agentPathFinding.StartingVertex = AgentStartingVertex;
-            agentPathFinding.EndingVertex = graph.Center;
-            agentPathFinding.Vertices = graph.Vertices;
-            agentPathFinding.FindShortestPath(agentPathFinding.StartingVertex, agentPathFinding.EndingVertex);
+            var agentBehaviour = agent.GetComponent<AgentBehaviour>();
+            agentBehaviour.StartingVertex = AgentStartingVertex;
+            agentBehaviour.EndingVertex = Graph.Center;
+            agentBehaviour.Vertices = Graph.Vertices;
+            agentBehaviour.FindShortestPath(agentBehaviour.StartingVertex, agentBehaviour.EndingVertex);
+            AgentExists = true;
             yield return new WaitForSeconds(3f);
         }
         IsAttackSequence = false;

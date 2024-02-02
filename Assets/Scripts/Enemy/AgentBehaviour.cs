@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using static UnityEngine.GraphicsBuffer;
 
-public class PathFinding : MonoBehaviour
+public class AgentBehaviour : MonoBehaviour
 {
     public Graph.Vertex StartingVertex;
     public Graph.Vertex EndingVertex;
@@ -15,17 +15,24 @@ public class PathFinding : MonoBehaviour
     private int CurrentStep;
     private List<Graph.Vertex> Path;
     private bool BobbingUp;
+    private GameObject GameManagerObject;
+    private GameManager GameManagerScript;
+    public int Hitpoints;
 
     private void Awake()
     {
+        Hitpoints = 10;
         BobbingUp = true;
         Path = new List<Graph.Vertex>();
         CurrentStep = 0;
         Speed = 2.0f;
+        GameManagerObject = GameObject.FindGameObjectWithTag("GameManager");
+        GameManagerScript = GameManagerObject.GetComponent<GameManager>();
     }
     void Update()
     {
         TraverseGraph();
+        CheckHitpoints();
     }
 
     private void TraverseGraph() 
@@ -40,11 +47,17 @@ public class PathFinding : MonoBehaviour
 
             if (CurrentStep == Path.Count - 1) 
             {
-                Destroy(gameObject);
+                Die();
             }
            
             BobUpAndDown(2f);
         }
+    }
+
+    private void Die() 
+    {
+        GameManagerScript.CheckAgentsExist();
+        Destroy(gameObject);
     }
     public void FindShortestPath(Graph.Vertex source, Graph.Vertex destination)
     {
@@ -100,7 +113,7 @@ public class PathFinding : MonoBehaviour
         foreach (Graph.Vertex v in path) 
         {
             count++;
-            Debug.Log($"Step {count} = " + v.Coordinates);
+            //Debug.Log($"Step {count} = " + v.Coordinates);
         }
         return path;
     }
@@ -153,6 +166,15 @@ public class PathFinding : MonoBehaviour
             {
                 BobbingUp = true; // Switch to moving up
             }
+        }
+    }
+
+    private void CheckHitpoints() 
+    {
+        if (Hitpoints == 0) 
+        {
+            GameManagerScript.Fund += 20;
+            Die();
         }
     }
 }

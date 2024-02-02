@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 7382053894021436467}
   - component: {fileID: 7647407033676351487}
   - component: {fileID: 1984914880676414623}
+  - component: {fileID: 4911664764055432615}
   m_Layer: 0
   m_Name: Camera
   m_TagString: Untagged
@@ -92,6 +93,19 @@ AudioListener:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2290812592550938734}
   m_Enabled: 1
+--- !u!114 &4911664764055432615
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2290812592550938734}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3adba04cccbec854b89d6de09ebdf5fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GameManagerObject: {fileID: 0}
 --- !u!1 &3090281031670369429
 GameObject:
   m_ObjectHideFlags: 0
@@ -125,6 +139,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7382053894021436467}
+  - {fileID: 3316029178168000525}
   m_Father: {fileID: 4812130528369679469}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &441011769162980908
@@ -230,7 +245,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 703009658109905091}
-  m_Father: {fileID: 4812130528369679469}
+  m_Father: {fileID: 2131751475856021431}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -521,7 +536,6 @@ Transform:
   - {fileID: 6901337376421318531}
   - {fileID: 1044909231763741495}
   - {fileID: 2131751475856021431}
-  - {fileID: 3316029178168000525}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!143 &1232658131296094584
