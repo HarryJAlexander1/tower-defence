@@ -9,12 +9,15 @@ public class ShootRaycast : MonoBehaviour
     GameObject GameManagerObject;
     GameManager GameManager;
     private float RaycastDistance;
+    GunEffects GunEffects;
+    public ParticleSystem HitEffect;
     // Start is called before the first frame update
     void Awake()
     {
-        RaycastDistance = 20f;
+        RaycastDistance = 100f;
         GameManagerObject = GameObject.Find("Game Manager");
         GameManager = GameManagerObject.GetComponent<GameManager>();
+        GunEffects = gameObject.GetComponentInChildren<GunEffects>();
     }
 
     // Update is called once per frame
@@ -37,23 +40,29 @@ public class ShootRaycast : MonoBehaviour
 
         // Create a Ray from the origin and direction
         Ray ray = new Ray(raycastOrigin, raycastDirection);
-
         RaycastHit hitInfo;
-        if (Physics.Raycast(ray, out hitInfo, RaycastDistance))
-        {
-            if (!GameManager.IsAttackSequence && !GameManager.AgentExists)
+        if (!GameManager.IsAttackSequence && !GameManager.AgentExists)
+        {      
+            if (Physics.Raycast(ray, out hitInfo, RaycastDistance))
             {
                 ManageBlocks(hitInfo, rightClickPressed);
-            }
-            else 
-            {
-                ManageHitOnEnemy(hitInfo);
-            }
+            }      
         }
         else
         {
-            Debug.Log("No hit");
-        }
+            ManageGunEffects();
+
+            if (Physics.Raycast(ray, out hitInfo, RaycastDistance))
+            {
+                ManageHitOnEnemy(hitInfo);
+                Instantiate(HitEffect, hitInfo.point, Quaternion.LookRotation(hitInfo.normal));   
+            }          
+        } 
+    }
+
+    private void ManageGunEffects() 
+    {
+        GunEffects.PlayGunEffects();
     }
 
     private void ManageHitOnEnemy(RaycastHit hitInfo) 
