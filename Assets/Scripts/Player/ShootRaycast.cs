@@ -11,13 +11,20 @@ public class ShootRaycast : MonoBehaviour
     private float RaycastDistance;
     GunEffects GunEffects;
     public ParticleSystem HitEffect;
+    public GameObject GunGameObject;
+    private Vector3 GunOriginalPosition;
+    private float RecoilForce;
+    private float RecoilRecoverySpeed;
     // Start is called before the first frame update
     void Awake()
     {
+        RecoilRecoverySpeed = 5f;
+        RecoilForce = 0.05f;
         RaycastDistance = 100f;
         GameManagerObject = GameObject.Find("Game Manager");
         GameManager = GameManagerObject.GetComponent<GameManager>();
         GunEffects = gameObject.GetComponentInChildren<GunEffects>();
+        GunOriginalPosition = GunGameObject.transform.localPosition;
     }
 
     // Update is called once per frame
@@ -31,6 +38,12 @@ public class ShootRaycast : MonoBehaviour
         {
             FireRaycast(true);
         }
+        GunGameObject.transform.localPosition = Vector3.Lerp(GunGameObject.transform.localPosition, GunOriginalPosition, Time.deltaTime * RecoilRecoverySpeed);
+    }
+
+    private void Recoil()
+    {
+        GunGameObject.transform.localPosition -= Vector3.forward * RecoilForce;
     }
 
     private void FireRaycast(bool rightClickPressed) 
@@ -51,7 +64,7 @@ public class ShootRaycast : MonoBehaviour
         else
         {
             ManageGunEffects();
-
+            Recoil();
             if (Physics.Raycast(ray, out hitInfo, RaycastDistance))
             {
                 ManageHitOnEnemy(hitInfo);

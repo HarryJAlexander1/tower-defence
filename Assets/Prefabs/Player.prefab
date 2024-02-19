@@ -106,7 +106,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3adba04cccbec854b89d6de09ebdf5fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  HitEffect: {fileID: 5024009746357069192, guid: ec3f674830402cc45bce805cf6493db7, type: 3}
+  HitEffect: {fileID: 5869992074867334315, guid: 4881d502f438fbe43917f9d24817c44f, type: 3}
+  GunGameObject: {fileID: 641041455672765419}
 --- !u!1 &3090281031670369429
 GameObject:
   m_ObjectHideFlags: 0
@@ -713,11 +714,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 0e2f4852e0b389746a89f6ff31b49486, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.20000002
+      value: 0.20000003
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 0e2f4852e0b389746a89f6ff31b49486, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.20000002
+      value: 0.20000003
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 0e2f4852e0b389746a89f6ff31b49486, type: 3}
       propertyPath: m_LocalPosition.x
@@ -729,7 +730,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 0e2f4852e0b389746a89f6ff31b49486, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.615
+      value: 0.61499983
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 0e2f4852e0b389746a89f6ff31b49486, type: 3}
       propertyPath: m_LocalRotation.w
