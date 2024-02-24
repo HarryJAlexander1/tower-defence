@@ -158,6 +158,7 @@ MonoBehaviour:
   PlayerPrefab: {fileID: 9039848750659920738, guid: 1619a62a7a1a34d4fbc67d938d538fda, type: 3}
   IsAttackSequence: 0
   AgentExists: 0
+  Fund: 0
 --- !u!4 &129125701
 Transform:
   m_ObjectHideFlags: 0

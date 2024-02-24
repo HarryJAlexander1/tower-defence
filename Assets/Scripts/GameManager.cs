@@ -27,7 +27,7 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Fund = 0;
+        Fund = 100000;
         AgentExists = false;
         IsAttackSequence = false;
         LevelCount = 0;
