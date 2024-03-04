@@ -18,6 +18,7 @@ public class AgentBehaviour : MonoBehaviour
     private GameObject GameManagerObject;
     private GameManager GameManagerScript;
     public int Hitpoints;
+    public GameObject Player;
 
     private void Awake()
     {
@@ -27,11 +28,21 @@ public class AgentBehaviour : MonoBehaviour
         CurrentStep = 0;
         Speed = 2.0f;
         GameManagerObject = GameObject.FindGameObjectWithTag("GameManager");
+        Player = GameObject.FindGameObjectWithTag("Player");
         GameManagerScript = GameManagerObject.GetComponent<GameManager>();
+    
     }
     void Update()
-    {
-        TraverseGraph();
+    { 
+        if (IsWithinShootingDistance(Player.transform, 10f))
+        {
+            ShootPlayer(Player.transform);
+        }
+        else 
+        { 
+            TraverseGraph(); 
+        }
+        
         CheckHitpoints();
     }
 
@@ -131,7 +142,7 @@ public class AgentBehaviour : MonoBehaviour
     private void MoveToNode(Graph.Vertex node)
     {
         Vector3 direction = node.Coordinates - transform.position;
-        transform.LookAt(node.Coordinates + Vector3.up * transform.localPosition.y);
+        transform.LookAt(node.Coordinates);
         // Normalize the direction to get a unit vector
         direction.Normalize();
 
@@ -169,6 +180,22 @@ public class AgentBehaviour : MonoBehaviour
                 BobbingUp = true; // Switch to moving up
             }
         }
+    }
+
+    private void ShootPlayer(Transform Player) 
+    {
+        // face player
+        transform.LookAt(Player);
+
+        // fire raycast
+    }
+
+    private bool IsWithinShootingDistance(Transform comparatorTransform, float shootingDistance) 
+    {
+        if (Vector3.Distance(transform.position, comparatorTransform.position) < shootingDistance)
+            return true;
+        else
+            return false;
     }
 
     private void CheckHitpoints() 
