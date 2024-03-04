@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -24,20 +25,23 @@ public class GameManager : MonoBehaviour
     private int LevelCount;
     public bool AgentExists;
     public int Fund;
+    public int PlayerScore;
     // Start is called before the first frame update
     void Start()
     {
+        PlayerScore = 0;
         Fund = 100000;
         AgentExists = false;
         IsAttackSequence = false;
-        LevelCount = 0;
+        LevelCount = 1;
         LevelSpawnPosition = new(0, -0.5f, 0);
         BoundrySquares = new List<Square>();
-        AgentSpawnNumber = 20;
         Squares = new List<Square>();
         CreateLevel();
         Graph = ScriptableObject.CreateInstance<Graph>();
         Graph.GenerateGraph(Squares);
+        AgentSpawnNumber = 1;
+        GenerateAgentSpawnPosition(Graph);
         SpawnEntity(new(5, 0, 0), PlayerPrefab); // spawn player
     }
 
@@ -45,8 +49,6 @@ public class GameManager : MonoBehaviour
     {
         if (!IsAttackSequence && Input.GetKeyDown(KeyCode.G) && !AgentExists) 
         {
-            LevelCount++;
-            IsAttackSequence = true;
             ExecuteAttackSequence();
         }
     }
@@ -76,7 +78,6 @@ public class GameManager : MonoBehaviour
     public void PlaceBlockOnNearestEmptyVertex(Vector3 rayCastHitPosition)
     {
         Graph.Vertex nearestVertex = FindNearestVertex(rayCastHitPosition, Graph.Vertices);
-        Instantiate(BlockPrefab, nearestVertex.Coordinates - (Vector3.up * 0.5f), Quaternion.identity);   
         foreach (Graph.Vertex neighbour in nearestVertex.Neighbours)   // remove this vertex from its neighbours 'neighbours' list
         {
             neighbour.Neighbours.Remove(nearestVertex);
@@ -84,6 +85,33 @@ public class GameManager : MonoBehaviour
 
         Graph.Vertices.Remove(nearestVertex);
         Graph.RemovedVertices.Add(nearestVertex);
+
+        // hacky code, but lets GameManager compute if their is a valid path for enemies or not, before allowing player to place block.
+        var agent = SpawnEntity(new(999, 999, 999), AgentPrefab);
+        var agentBehaviour = agent.GetComponent<AgentBehaviour>();
+        agentBehaviour.StartingVertex = AgentStartingVertex;
+        agentBehaviour.EndingVertex = Graph.Center;
+        agentBehaviour.Vertices = Graph.Vertices;
+        agentBehaviour.FindShortestPath(agentBehaviour.StartingVertex, agentBehaviour.EndingVertex);
+
+        if (agentBehaviour.Path != null)
+        {
+            Instantiate(BlockPrefab, nearestVertex.Coordinates - (Vector3.up * 0.5f), Quaternion.identity);
+            Fund -= 10;
+        }
+        else 
+        {
+            Debug.Log("No valid path found to center.");
+            // revert changes to graph
+            foreach (Graph.Vertex neighbour in nearestVertex.Neighbours)   // remove this vertex from its neighbours 'neighbours' list
+            {
+                neighbour.Neighbours.Add(nearestVertex);
+            }
+            Graph.Vertices.Add(nearestVertex);
+            Graph.RemovedVertices.Remove(nearestVertex);
+        }
+
+        Destroy(agent);
     }
 
     public void RemoveBlock(Vector3 rayCastHitPosition, GameObject block) 
@@ -100,8 +128,8 @@ public class GameManager : MonoBehaviour
 
     private void ExecuteAttackSequence() 
     {
-        //Graph.GenerateGraph(Squares);
-        GenerateAgentSpawnPosition(Graph);
+        IsAttackSequence = true;
+        AgentSpawnNumber = LevelCount * 10;
         StartExecution();
     }
     private void GenerateAgentSpawnPosition(Graph graph) 
@@ -116,7 +144,7 @@ public class GameManager : MonoBehaviour
                 if (v.Coordinates == square.CenterPoint)
                 {
                     AgentStartingVertex = v;
-                    break;
+                    return;
                 }
             }
         }
@@ -140,6 +168,7 @@ public class GameManager : MonoBehaviour
             yield return new WaitForSeconds(3f);
         }
         IsAttackSequence = false;
+        LevelCount++;
     }
     private void CreateLevel()
     {

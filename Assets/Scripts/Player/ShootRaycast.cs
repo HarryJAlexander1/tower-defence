@@ -102,7 +102,6 @@ public class ShootRaycast : MonoBehaviour
             if (hitInfo.collider.gameObject.CompareTag("Floor") && GameManager.Fund >= 10)
             {
                 GameManager.PlaceBlockOnNearestEmptyVertex(hitInfo.point);
-                GameManager.Fund -= 10;
             }
         }
     }
