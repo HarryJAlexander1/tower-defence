@@ -13,7 +13,7 @@ public class AgentBehaviour : MonoBehaviour
     public List<Graph.Vertex> Vertices;
     private float Speed;
     private int CurrentStep;
-    private List<Graph.Vertex> Path;
+    public List<Graph.Vertex> Path;
     private bool BobbingUp;
     private GameObject GameManagerObject;
     private GameManager GameManagerScript;
@@ -50,15 +50,17 @@ public class AgentBehaviour : MonoBehaviour
                 Die();
             }
            
-            BobUpAndDown(2f);
+           // BobUpAndDown(2f);
         }
     }
 
     private void Die() 
     {
         GameManagerScript.CheckAgentsExist();
+        GameManagerScript.PlayerScore += 10;
         Destroy(gameObject);
     }
+
     public void FindShortestPath(Graph.Vertex source, Graph.Vertex destination)
     {
         // Initialize the queue for BFS
@@ -129,7 +131,7 @@ public class AgentBehaviour : MonoBehaviour
     private void MoveToNode(Graph.Vertex node)
     {
         Vector3 direction = node.Coordinates - transform.position;
-
+        transform.LookAt(node.Coordinates + Vector3.up * transform.localPosition.y);
         // Normalize the direction to get a unit vector
         direction.Normalize();
 
