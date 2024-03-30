@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -22,18 +24,20 @@ public class GameManager : MonoBehaviour
     public List<Square> Squares;
     public GameObject PlayerPrefab;
     public bool IsAttackSequence;
-    private int LevelCount;
+    public int LevelCount;
     public bool AgentExists;
     public int Fund;
     public int PlayerScore;
+    public int PlayerHealth;
+    public int TowerHealth;
     // Start is called before the first frame update
     void Start()
     {
         PlayerScore = 0;
-        Fund = 100000;
+        Fund = 100;
         AgentExists = false;
         IsAttackSequence = false;
-        LevelCount = 1;
+        LevelCount = 0;
         LevelSpawnPosition = new(0, -0.5f, 0);
         BoundrySquares = new List<Square>();
         Squares = new List<Square>();
@@ -43,19 +47,32 @@ public class GameManager : MonoBehaviour
         AgentSpawnNumber = 1;
         GenerateAgentSpawnPosition(Graph);
         SpawnEntity(new(5, 0, 0), PlayerPrefab); // spawn player
+        PlayerHealth = 10;
+        TowerHealth = 10;
     }
 
     private void Update()
     {
         if (!IsAttackSequence && Input.GetKeyDown(KeyCode.G) && !AgentExists) 
         {
+            LevelCount++;
             ExecuteAttackSequence();
         }
+        CheckIfGameEnd();
     }
 
     public void CheckAgentsExist() 
     {
         AgentExists = GameObject.FindGameObjectsWithTag("Agent").Length > 1;
+    }
+
+    private void CheckIfGameEnd() 
+    {
+        if (PlayerHealth <= 0 || TowerHealth <= 0) 
+        {
+            Debug.Log("Game Over");
+            EditorApplication.isPlaying = false;
+        }
     }
 
     private Graph.Vertex FindNearestVertex(Vector3 rayCastHitPosition, List<Graph.Vertex> VerticesList) 
@@ -168,7 +185,6 @@ public class GameManager : MonoBehaviour
             yield return new WaitForSeconds(3f);
         }
         IsAttackSequence = false;
-        LevelCount++;
     }
     private void CreateLevel()
     {
