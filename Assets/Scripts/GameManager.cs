@@ -26,6 +26,7 @@ public class GameManager : MonoBehaviour
     public bool AgentExists;
     public int Fund;
     public int PlayerScore;
+    public int PlayerHealth;
     // Start is called before the first frame update
     void Start()
     {
@@ -43,6 +44,7 @@ public class GameManager : MonoBehaviour
         AgentSpawnNumber = 1;
         GenerateAgentSpawnPosition(Graph);
         SpawnEntity(new(5, 0, 0), PlayerPrefab); // spawn player
+        PlayerHealth = 10;
     }
 
     private void Update()

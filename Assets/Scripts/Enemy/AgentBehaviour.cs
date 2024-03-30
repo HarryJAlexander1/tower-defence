@@ -19,7 +19,11 @@ public class AgentBehaviour : MonoBehaviour
     private GameManager GameManagerScript;
     public int Hitpoints;
     public GameObject Player;
+    private float RaycastDistance;
+    private AgentGunEffects GunEffects;
 
+    public float shootCooldown = 0.5f; // Cooldown duration between shots
+    private float nextShootTime = 0f; // Time when the enemy can shoot again
     private void Awake()
     {
         Hitpoints = 10;
@@ -30,13 +34,17 @@ public class AgentBehaviour : MonoBehaviour
         GameManagerObject = GameObject.FindGameObjectWithTag("GameManager");
         Player = GameObject.FindGameObjectWithTag("Player");
         GameManagerScript = GameManagerObject.GetComponent<GameManager>();
-    
+        RaycastDistance = 100f;
+        GunEffects = GetComponent<AgentGunEffects>();        
     }
     void Update()
     { 
-        if (IsWithinShootingDistance(Player.transform, 10f))
+        if (IsWithinShootingDistance(Player.transform, 5f))
         {
-            ShootPlayer(Player.transform);
+            // face player
+            transform.LookAt(Player.transform);
+            if (Time.time >= nextShootTime)
+                ShootPlayer();
         }
         else 
         { 
@@ -182,12 +190,31 @@ public class AgentBehaviour : MonoBehaviour
         }
     }
 
-    private void ShootPlayer(Transform Player) 
+    private void ShootPlayer() 
     {
-        // face player
-        transform.LookAt(Player);
-
         // fire raycast
+        FireRaycast();
+        nextShootTime = Time.time + shootCooldown;
+    }
+
+    private void FireRaycast()
+    {
+        Vector3 raycastOrigin = transform.position;
+        Vector3 raycastDirection = transform.forward;
+
+        // Create a Ray from the origin and direction
+        Ray ray = new Ray(raycastOrigin, raycastDirection);
+        RaycastHit hitInfo;
+
+        if (Physics.Raycast(ray, out hitInfo, RaycastDistance))
+        {
+            GunEffects.PlayGunEffects();
+            GameObject hitGameObject = hitInfo.transform.gameObject;
+            if (hitGameObject.CompareTag("Player")) 
+            {
+                GameManagerScript.PlayerHealth--;
+            }
+        }
     }
 
     private bool IsWithinShootingDistance(Transform comparatorTransform, float shootingDistance) 
