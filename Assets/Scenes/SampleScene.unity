@@ -157,8 +157,12 @@ MonoBehaviour:
   AgentPrefab: {fileID: 5986678848766578628, guid: 1202540420c761b45a816f2a628ce32d, type: 3}
   PlayerPrefab: {fileID: 9039848750659920738, guid: 1619a62a7a1a34d4fbc67d938d538fda, type: 3}
   IsAttackSequence: 0
+  LevelCount: 0
   AgentExists: 0
   Fund: 0
+  PlayerScore: 0
+  PlayerHealth: 0
+  TowerHealth: 0
 --- !u!4 &129125701
 Transform:
   m_ObjectHideFlags: 0
