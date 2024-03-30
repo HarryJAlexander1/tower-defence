@@ -1002,6 +1002,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Hitpoints: 0
   Player: {fileID: 0}
+  shootCooldown: 0.5
 --- !u!114 &8490945609062646704
 MonoBehaviour:
   m_ObjectHideFlags: 0

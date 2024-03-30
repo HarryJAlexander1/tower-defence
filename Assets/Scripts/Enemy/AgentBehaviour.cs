@@ -22,8 +22,9 @@ public class AgentBehaviour : MonoBehaviour
     private float RaycastDistance;
     private AgentGunEffects GunEffects;
 
-    public float shootCooldown = 0.5f; // Cooldown duration between shots
-    private float nextShootTime = 0f; // Time when the enemy can shoot again
+    public float ShootCooldown = 0.5f; // Cooldown duration between shots
+    private float NextShootTime = 0f; // Time when the enemy can shoot again
+    private int ShootingRangeOffset;
     private void Awake()
     {
         Hitpoints = 10;
@@ -35,15 +36,16 @@ public class AgentBehaviour : MonoBehaviour
         Player = GameObject.FindGameObjectWithTag("Player");
         GameManagerScript = GameManagerObject.GetComponent<GameManager>();
         RaycastDistance = 100f;
-        GunEffects = GetComponent<AgentGunEffects>();        
+        GunEffects = GetComponent<AgentGunEffects>();  
+        ShootingRangeOffset = Random.Range(0, 5);
     }
     void Update()
     { 
-        if (IsWithinShootingDistance(Player.transform, 5f))
+        if (IsWithinShootingDistance(Player.transform, 10f, ShootingRangeOffset))
         {
             // face player
             transform.LookAt(Player.transform);
-            if (Time.time >= nextShootTime)
+            if (Time.time >= NextShootTime)
                 ShootPlayer();
         }
         else 
@@ -67,6 +69,7 @@ public class AgentBehaviour : MonoBehaviour
             if (CurrentStep == Path.Count - 1) 
             {
                 Die();
+                GameManagerScript.TowerHealth--;
             }
            
            // BobUpAndDown(2f);
@@ -194,7 +197,7 @@ public class AgentBehaviour : MonoBehaviour
     {
         // fire raycast
         FireRaycast();
-        nextShootTime = Time.time + shootCooldown;
+        NextShootTime = Time.time + ShootCooldown;
     }
 
     private void FireRaycast()
@@ -217,9 +220,9 @@ public class AgentBehaviour : MonoBehaviour
         }
     }
 
-    private bool IsWithinShootingDistance(Transform comparatorTransform, float shootingDistance) 
+    private bool IsWithinShootingDistance(Transform comparatorTransform, float shootingDistance, int offset) 
     {
-        if (Vector3.Distance(transform.position, comparatorTransform.position) < shootingDistance)
+        if (Vector3.Distance(transform.position, comparatorTransform.position) < shootingDistance + offset)
             return true;
         else
             return false;
